@@ -16,6 +16,20 @@ to support tcMenu, but has been extracted into a standalone library for general 
 a huge number of users menus, and it light enough to run on an 8-bit AVR microcontroller with 2K or RAM. Further it will
 only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
 
+
+## What are we optimizing for?
+
+I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimise,
+we have have to ask what exactly were trying to optimize for. For example, sometimes its preferential to have a bit higher
+CPU activity but less memory churn, and that's exactly what this library is designed to do. 
+
+The idea is that on starting up the messages would get created, for a price system as an example they'd go into a map
+by ticker or other key, and then they'd be updated against the key. These classes are designed for cases where either
+the objects can be pooled, and repeatedly given out, or situations such as price data where the existing data is updated.
+
+It would not be particularly efficient to use this library for a situation where the message objects need to be 
+created frequently.
+
 ## Using C++ structs in your java code
 
 In the simplest case, you'd create a class extending `BaseMessage` that has some views in it, and a structure size.
@@ -77,7 +91,7 @@ find useful. We strongly believe in open-source as you'll see from both [tcmenu 
 and my own repos (here).
 
 Dave Cherry is a senior software engineer with over 30 years experience in C++, embedded systems and Java development. 
-He is the author of tcMenu, a popular open-source menu system for embedded systems, and has contributed to many open-source
-projects. As alias DaveTCC he has a user in many forums and communities.
+He works in financial services IT and is also the author of tcMenu, a popular open-source menu/UI system for embedded 
+systems. He has also contributed to many open-source projects. As alias DaveTCC he has a user in many forums and communities.
 
 See my profile on LinkedIn: https://www.linkedin.com/in/davejcherry/
