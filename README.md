@@ -1,13 +1,17 @@
 ## ByteStruct - low latency access to C++ style struct data in Java 
 
+# byte-struct
+
+[![Maven Build](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
+
 Provides access to C++ style struct data in Java without requiring memory allocation in the main loop.
 
 Licence: Apache 2.0
 
-This class works by providing a set of views into a byte array, allowing for efficient and type-safe access to 
-C++ struct data in Java, with minimal overhead and no runtime dependencies. It presently requires Java 25 because
-it is envisaged that it will be mainly used along with the Foreign Memory API, which is only available in Java 22
-and later.
+This library provides a message class, along with a set of views that look into a byte array, allowing for efficient and
+type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies. It should work with
+Java 21 and upward, but as it's generally designed to work with Project Panama foreign memory API, I'd imagine that it
+will be mainly used with versions 22 and later.
 
 The UTF-8 parser is a compliant parser that allocates no memory at runtime beyond initial creation, it was built originally
 to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
