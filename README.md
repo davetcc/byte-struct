@@ -6,26 +6,28 @@ Provides access to C++ struct data in Java without requiring memory allocation i
 
 Licence: Apache 2.0
 
-This library provides a `BaseMessage` class that can process data in C++ structs, with minimal runtime allocation in the main loop. To acess the data in the message we simply create views that look into a byte array. These views allow for efficient and
-type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies. It should work with
-Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd imagine that it
-will be mainly used with versions 22 and later.
+This library provides a `BaseMessage` class that can process data in C++ struct format, with minimal runtime allocation 
+in the main loop. To access the data in the message we simply create views that look into a byte array. These views allow
+for efficient and type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies. 
 
-The UTF-8 parser is a compliant parser that allocates no memory at runtime beyond initial creation, it was built originally
+It should work with Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd 
+imagine that it will be mainly used with versions 22 and later.
+
+The UTF-8 parser is compliant and allocates no memory at runtime beyond initial creation, it was built originally
 to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
-a huge number of users menus, and it light enough to run on an 8-bit AVR microcontroller with 2K or RAM. Further it will
-only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
-
+a huge number of library users, and it light enough to run on an 8-bit AVR microcontroller with 32K FLASH and 2K of RAM.
+Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
 
 ## What are we optimizing for?
 
-I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimise,
-we have have to ask what exactly were trying to optimize for. For example, sometimes its preferential to have a bit higher
-CPU activity but less memory churn, and that's exactly what this library is designed to do. 
+I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimize,
+we have have to ask what exactly we are trying to optimize for. For example, sometimes its preferential to have a bit higher
+CPU activity but less memory churn, and that's exactly what this library is designed to do.
 
-The idea is that on starting up the messages would get created, for a price system as an example they'd go into a map
-by ticker or other key, and then they'd be updated against the key. These classes are designed for cases where either
-the objects can be pooled, and repeatedly given out, or situations such as price data where the existing data is updated.
+The general idea behind the project is that on start up the messages would get created, for a price system as an example 
+they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are designed for
+cases where either the objects can be pooled, and repeatedly given out, or situations such as price data where the
+existing data is updated.
 
 It would not be particularly efficient to use this library for a situation where the message objects need to be 
 created frequently.
@@ -61,7 +63,7 @@ In Java land we create:
         }
     }
 
-Here as an example we use a native method handle with an arena and populate from that
+Here as an example, we use a native method handle with an arena and populate our message from that:
 
     try(var arena = Arena.ofConfined()) {
         // you'd normally try to hold on to these for as long as possible
@@ -78,7 +80,7 @@ Here as an example we use a native method handle with an arena and populate from
                Instant.ofEpochMilli(priceMessage.getMillisEpoch().asLong()));
     }
 
-You can also split up `IntegerView` and `LongView` into partial fields as follows:
+You can also split up `IntegerView` and `LongView` into partial fields as follows allowing for bit structs like in C:
 
     anIntView.booleanPartial(bit) - get the boolean (0=false, 1=true) from a bit
     anIntView.intPartial(startBit, numBits) - get the integer value from a bit range
@@ -87,7 +89,7 @@ You can also split up `IntegerView` and `LongView` into partial fields as follow
 ## Provided by TheCodersCorner.com / Dave Cherry.
 
 Dave Cherry/TheCodersCorner.com invest a lot of time and resources into making this open source product, and I hope you'll
-find useful. We strongly believe in open-source as you'll see from both [tcmenu repositories](https://github.com/tcmenu)
+find it useful. We strongly believe in open-source as you'll see from both [tcmenu repositories](https://github.com/tcmenu)
 and my own repos (here).
 
 Dave Cherry is a senior software engineer with over 30 years experience in C++, embedded systems and Java development. 
