@@ -1,6 +1,4 @@
-## ByteStruct - low latency access to C++ style struct data in Java 
-
-# byte-struct
+# ByteStruct - low latency access to C++ struct data in Java 
 
 [![Maven Build](https://github.com/davetcc/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
 
@@ -16,7 +14,7 @@ will be mainly used with versions 22 and later.
 The UTF-8 parser is a compliant parser that allocates no memory at runtime beyond initial creation, it was built originally
 to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
 a huge number of users menus, and it light enough to run on an 8-bit AVR microcontroller with 2K or RAM. Further it will
-only lazy evaluate the UTF-8 encoding when the first request for the data is made. 
+only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
 
 ## Using C++ structs in your java code
 
