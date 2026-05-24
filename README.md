@@ -9,6 +9,13 @@ C++ struct data in Java, with minimal overhead and no runtime dependencies. It p
 it is envisaged that it will be mainly used along with the Foreign Memory API, which is only available in Java 22
 and later.
 
+The UTF-8 parser is a compliant parser that allocates no memory at runtime beyond initial creation, it was built originally
+to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
+a huge number of users menus, and it light enough to run on an 8-bit AVR microcontroller with 2K or RAM. Further it will
+only lazy evaluate the UTF-8 encoding when the first request for the data is made. 
+
+## Using C++ structs in your java code
+
 In the simplest case, you'd create a class extending `BaseMessage` that has some views in it, and a structure size.
 Once you've allocated the class, you can avoid memory allocation all together in the main processing loop.
 
