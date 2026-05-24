@@ -4,13 +4,13 @@
 
 [![Maven Build](https://github.com/davetcc/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
 
-Provides access to C++ style struct data in Java without requiring memory allocation in the main loop.
+Provides access to C++ struct data in Java without requiring memory allocation in the main loop.
 
 Licence: Apache 2.0
 
-This library provides a message class, along with a set of views that look into a byte array, allowing for efficient and
+This library provides a `BaseMessage` class that can process data in C++ structs, with minimal runtime allocation in the main loop. To acess the data in the message we simply create views that look into a byte array. These views allow for efficient and
 type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies. It should work with
-Java 21 and upward, but as it's generally designed to work with Project Panama foreign memory API, I'd imagine that it
+Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd imagine that it
 will be mainly used with versions 22 and later.
 
 The UTF-8 parser is a compliant parser that allocates no memory at runtime beyond initial creation, it was built originally
@@ -25,6 +25,7 @@ Once you've allocated the class, you can avoid memory allocation all together in
 
 In C++ land we have:
 
+    @alignas(4)
     struct PriceMessage {
         const char ticker[32]; //0..31  32
         const char symbol[16]; //32..48 16
@@ -48,7 +49,7 @@ In Java land we create:
         }
     }
 
-Then we can use for example a native method handle with an arena and populate from that
+Here as an example we use a native method handle with an arena and populate from that
 
     try(var arena = Arena.ofConfined()) {
         // you'd normally try to hold on to these for as long as possible
