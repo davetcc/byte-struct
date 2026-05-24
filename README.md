@@ -2,7 +2,7 @@
 
 # byte-struct
 
-[![Maven Build](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
+[![Maven Build](https://github.com/davetcc/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
 
 Provides access to C++ style struct data in Java without requiring memory allocation in the main loop.
 
