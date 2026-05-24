@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LongViewTest {
     enum TestEnum {
@@ -211,6 +209,18 @@ class LongViewTest {
         assertEquals(12345.6789D, view.asDoubleFromBits());
         // test force caching
         assertEquals(12345.6789D, view.asDoubleFromBits());
+    }
+
+    @Test
+    void testHashcodeAndEquals() {
+        var view = new LongView(nativeBytesFor(0x12345678), 0);
+        var view2 = new LongView(nativeBytesFor(0x12345678), 0);
+        assertEquals(view, view2);
+        assertEquals(view.hashCode(), view2.hashCode());
+
+        var view3 = new LongView(nativeBytesFor(0x12345679), 0);
+        assertNotEquals(view, view3);
+        assertNotEquals(view.hashCode(), view3.hashCode());
     }
 
     private static byte[] nativeBytesFor(long value) {

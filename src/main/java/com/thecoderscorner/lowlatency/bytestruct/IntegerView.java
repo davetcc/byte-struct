@@ -62,4 +62,26 @@ public class IntegerView implements ByteViewListener {
         underlyingData.set(data);
         dataChanged.set(true);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if(o == this) return true;
+        IntegerView that = (IntegerView) o;
+        return that.asInt() == this.asInt();
+    }
+
+    @Override
+    public int hashCode() {
+        var x = asInt();
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = (x >> 16) ^ x;
+        return x;
+    }
+
+    @Override
+    public String toString() {
+        return "IntegerView{" + " locationOfInt=" + locationOfInt + '}';
+    }
 }

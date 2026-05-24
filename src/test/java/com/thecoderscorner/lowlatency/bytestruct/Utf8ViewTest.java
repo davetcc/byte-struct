@@ -58,4 +58,16 @@ class Utf8ViewTest {
         view.dataHasChanged(replacementBytes);
         assertEquals("Abcfe", view.toString());
     }
+
+    @Test
+    void testHashcodeAndEquals() {
+        var view = new Utf8View(UNICODE_BYTES, 0, UNICODE_BYTES.length);
+        var view2 = new Utf8View(UNICODE_BYTES, 0, UNICODE_BYTES.length);
+        assertEquals(view, view2);
+        assertEquals(view.hashCode(), view2.hashCode());
+
+        var view3 = new Utf8View(UNICODE_BYTES, 0, UNICODE_BYTES.length - 1);
+        assertNotEquals(view, view3);
+        assertNotEquals(view.hashCode(), view3.hashCode());
+    }
 }

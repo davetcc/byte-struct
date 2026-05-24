@@ -69,4 +69,26 @@ public class LongView implements ByteViewListener {
         underlyingData.set(data);
         dataChanged.set(true);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if(o == this) return true;
+        LongView other = (LongView) o;
+        return other.asLong() == asLong();
+    }
+
+    @Override
+    public int hashCode() {
+        var x = asLong();
+        x = ((x >> 30) ^ x) * 0x45d9f3b;
+        x = ((x >> 27) ^ x) * 0x45d9f3b;
+        x = (x >> 31) ^ x;
+        return (int)x;
+    }
+
+    @Override
+    public String toString() {
+        return "LongView{" + " locationOfInt=" + locationOfInt + '}';
+    }
 }

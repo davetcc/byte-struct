@@ -1,5 +1,6 @@
 package com.thecoderscorner.lowlatency.bytestruct;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -74,5 +75,23 @@ public class Utf8View implements Comparable<Utf8View>, ByteViewListener {
             if(intCodePoints[i] == 0) return 0;
         }
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if(o == this) return true;
+        var other = ((Utf8View) o).asCodePoints();
+        var ours = asCodePoints();
+        for(int i=0; i<ours.length; i++) {
+            if(other[i] != ours[i]) return false;
+            if(other[i] == 0) return true;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(length);
     }
 }

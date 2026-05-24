@@ -154,6 +154,18 @@ class IntegerViewTest {
         assertEquals(TestEnum.ONE, view.enumPartial(0, 8, TestEnum.class));
     }
 
+    @Test
+    void testHashcodeAndEquals() {
+        var view = new IntegerView(nativeBytesFor(0x12345678), 0);
+        var view2 = new IntegerView(nativeBytesFor(0x12345678), 0);
+        assertEquals(view, view2);
+        assertEquals(view.hashCode(), view2.hashCode());
+
+        var view3 = new IntegerView(nativeBytesFor(0x12345679), 0);
+        assertNotEquals(view, view3);
+        assertNotEquals(view.hashCode(), view3.hashCode());
+    }
+
     private static byte[] nativeBytesFor(int value) {
         if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
             return new byte[] {
