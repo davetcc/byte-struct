@@ -151,7 +151,7 @@ class IntegerViewTest {
 
         var view = new IntegerView(data, 0);
 
-        assertEquals(TestEnum.ONE.ordinal(), view.intPartial(0, 8));
+        assertEquals(TestEnum.ONE, view.enumPartial(0, 8, TestEnum.class));
     }
 
     private static byte[] nativeBytesFor(int value) {
