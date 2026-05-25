@@ -2,7 +2,8 @@
 
 [![Maven Build](https://github.com/davetcc/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
 
-Provides access to C++ struct data in Java without requiring memory allocation in the main loop.
+Zero‑allocation typed views over byte arrays for high‑performance message processing. Lazy evaluation of the data,
+no memory allocation at runtime beyond initial creation.
 
 Licence: Apache 2.0
 
@@ -20,17 +21,17 @@ Further it will only lazy evaluate the UTF-8 encoding when the first request for
 
 ## What are we optimizing for?
 
+TL;DR: This library is most effective if the messages are reused in a pool or conflate. It would not be particularly 
+efficient to use this library for a situation where the message objects need to be created frequently.
+
 I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimize,
 we have have to ask what exactly we are trying to optimize for. For example, sometimes its preferential to have a bit higher
 CPU activity but less memory churn, and that's exactly what this library is designed to do.
 
-The general idea behind the project is that on start up the messages would get created, for a price system as an example 
-they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are designed for
-cases where either the objects can be pooled, and repeatedly given out, or situations such as price data where the
-existing data is updated.
-
-It would not be particularly efficient to use this library for a situation where the message objects need to be 
-created frequently.
+The general idea behind the project is that there would be a one-off cost of message creation, for a price system as an
+example they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are
+designed for cases where either the objects can be pooled, and repeatedly given out, or situations such as price data
+where the existing data is updated.
 
 ## Using C++ structs in your java code
 
@@ -74,7 +75,7 @@ Here as an example, we use a native method handle with an arena and populate our
         getPriceFromCppCodeHandle.invokeExact(data);
         MemorySegment.copy(data, ValueLayout.JAVA_BYTE, 0, dest, 0, dest.length);
  
-        // use the data (logging it as an example)
+        // use the data (logging it as an example, obviously don't do this in production)
         log.info("Acquired price: {} - {}: {} at {}", priceMessage.getTicker().toString(),
                priceMessage.getSource().toString(), priceMessage.getTickPrice().asInt(),
                Instant.ofEpochMilli(priceMessage.getMillisEpoch().asLong()));
@@ -85,15 +86,38 @@ You can also split up `IntegerView` and `LongView` into partial fields as follow
     anIntView.booleanPartial(bit) - get the boolean (0=false, 1=true) from a bit
     anIntView.intPartial(startBit, numBits) - get the integer value from a bit range
     anIntView.enumPartial(startBit, numBits, MyEnum.class) - maps to the provided enum by ordinal
-    
-## Provided by TheCodersCorner.com / Dave Cherry.
 
-Dave Cherry/TheCodersCorner.com invest a lot of time and resources into making this open source product, and I hope you'll
-find it useful. We strongly believe in open-source as you'll see from both [tcmenu repositories](https://github.com/tcmenu)
-and my own repos (here).
+## Using the UTF-8 Unicode encoder standalone
 
-Dave Cherry is a senior software engineer with over 30 years experience in C++, embedded systems and Java development. 
-He works in financial services IT and is also the author of tcMenu, a popular open-source menu/UI system for embedded 
-systems. He has also contributed to many open-source projects. As alias DaveTCC he has a user in many forums and communities.
+There is a stream based UTF-8 encoder that can be used standalone. This is useful if you want to decode strings into
+an int array without using the `Message` class. The encoder can be used as below:
+
+    // create a text processor that can process UTF-8 encoded text, 
+    // it is not thread safe, create one per thread.
+    var textProcessor = new Utf8TextProcessor(anIntConsumer, UnicodeEncodingMode.ENCMODE_UTF8);
+    // Important, reset the processor to start processing a new string
+    textProcessor.reset();
+    // push a UTF-8 encoded character, this will decode the character and call the consumer with the unicode value
+    textProcessor.pushChar((byte) 0xf1);
+    textProcessor.pushChar((byte) 0x81);
+
+**When to use this?** Either in systems that require reduced allocation or when dealing with C++ structs.
+
+In regular systems where memory allocation is not an issue do not use this class. For example, in tcMenu designer.
+I don't even use these classes myself because it is not low latency, it is high throughput and does not need this
+extra complexity.
+
+## ByteStruct is provided by Dave Cherry / TheCodersCorner.com.
+
+I invest a significant amount of time and energy into building open‑source libraries that are used in production by many
+companies and hobbyists alike. I hope you find this project useful. You can see the wider ecosystem in both the 
+[tcMenu repositories](https://github.com/tcmenu) and my [own projects](https://github.com/davetcc) here on GitHub.
+
+### About the author
+
+Dave Cherry is a senior software engineer with over 30 years of experience across C++, embedded systems, and Java.
+He works in financial services technology and is the creator of tcMenu, a widely‑used open‑source menu/UI framework 
+for embedded devices. He has contributed to numerous open‑source projects over the years and is active in many technical
+communities under the alias **DaveTCC**.
 
 See my profile on LinkedIn: https://www.linkedin.com/in/davejcherry/
