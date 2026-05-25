@@ -54,8 +54,8 @@ public class BaseMessage {
      * This indicates that the original underlying data has changed, and listeners should be notified.
      */
     public void existingArrayChanged() {
-        for (ByteViewListener listener : listeners) {
-            listener.dataHasChanged(data.get());
+        for(int i=0; i<listeners.size(); i++) {
+            listeners.get(i).dataHasChanged(data.get());
         }
     }
 
@@ -69,8 +69,8 @@ public class BaseMessage {
         }
 
         System.arraycopy(newBytes, 0, data.get(), 0, data.get().length);
-        for (ByteViewListener listener : listeners) {
-            listener.dataHasChanged(newBytes);
+        for(int i=0; i<listeners.size(); i++) {
+            listeners.get(i).dataHasChanged(newBytes);
         }
     }
 
