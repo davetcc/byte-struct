@@ -92,6 +92,11 @@ public class Utf8View implements Comparable<Utf8View>, ByteViewListener {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(length);
+        int hash = 0;
+        var points = asCodePoints();
+        for(int i=0; i<points.length; i++) {
+            hash = 31 * hash + points[i];
+        }
+        return hash;
     }
 }

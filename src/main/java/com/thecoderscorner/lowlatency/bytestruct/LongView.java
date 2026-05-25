@@ -1,6 +1,7 @@
 package com.thecoderscorner.lowlatency.bytestruct;
 
 import java.nio.ByteOrder;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,5 +91,9 @@ public class LongView implements ByteViewListener {
     @Override
     public String toString() {
         return "LongView{" + " locationOfInt=" + locationOfInt + '}';
+    }
+
+    public Instant asInstant() {
+        return Instant.ofEpochMilli(asLong());
     }
 }
