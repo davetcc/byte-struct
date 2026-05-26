@@ -40,6 +40,7 @@ public class BaseMessage {
         }
 
         System.arraycopy(other.getUnderlyingData(), 0, data.get(), 0, data.get().length);
+        existingArrayChanged();
     }
 
     /**
