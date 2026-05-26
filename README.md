@@ -40,7 +40,6 @@ Once you've allocated the class, you can avoid memory allocation all together in
 
 In C++ land we have:
 
-    @alignas(4)
     struct PriceMessage {
         const char ticker[32]; //0..31  32
         const char symbol[16]; //32..48 16
