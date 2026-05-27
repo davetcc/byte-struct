@@ -9,7 +9,7 @@ Licence: Apache 2.0
 
 This library provides a `BaseMessage` class that can process data in C++ struct format, with minimal runtime allocation 
 in the main loop. To access the data in the message we simply create views that look into a byte array. These views allow
-for efficient and type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies. 
+for efficient and type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies.
 
 It should work with Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd 
 imagine that it will be mainly used with versions 22 and later.
@@ -18,6 +18,8 @@ The UTF-8 parser is compliant and allocates no memory at runtime beyond initial 
 to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
 a huge number of library users, and it light enough to run on an 8-bit AVR microcontroller with 32K FLASH and 2K of RAM.
 Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
+
+There is a [demonstration project repository](https://github.com/davetcc/MockTradingSimulator) that doubles as my test-harness.
 
 ## What are we optimizing for?
 
@@ -32,6 +34,9 @@ The general idea behind the project is that there would be a one-off cost of mes
 example they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are
 designed for cases where either the objects can be pooled, and repeatedly given out, or situations such as price data
 where the existing data is updated.
+
+Profiling of Java code with the MockTradingSystem shared library loaded shows that this library can process millions of
+messages without significantly affecting JVM memory. 
 
 ## Using C++ structs in your java code
 
