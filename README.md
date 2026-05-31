@@ -27,9 +27,13 @@ Use ByteStruct when:
 * You want predictable GC behaviour in a real‑time pipeline.
 * You’re working with dynamic or evolving layouts where schema compilers are a burden.
 * You want a simple, explicit struct view without code generation or external tools.
-* You’re decoding messages that will be stored or reused without copying.
+* You’re decoding messages that will be stored or reused with minimal copying.
 
-This is ideal for market‑data feeds, telemetry, IPC, off‑heap storage, and any throughput‑sensitive system.
+In summary, byte-struct is not the fastest library out there, and was never deigned to be. Rather, consider it as a series of components that make reading C-struct style byte arrays easier. It is ideal for market‑data feeds, telemetry, IoT sensor acquisition, IPC, off‑heap storage, and any throughput‑sensitive system.
+
+## Examples, benchmarks and test harness
+
+The [trading sim and other examples](examples/README.md) are packaged within this repository. The example used in the YouTube introduction/demonstration and benchmarks are directly buildable and available there.
 
 ## Addressing the Two Common Questions
 
