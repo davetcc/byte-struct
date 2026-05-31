@@ -2,10 +2,46 @@
 
 [![Maven Build](https://github.com/davetcc/byte-struct/actions/workflows/maven.yml/badge.svg)](https://github.com/thecoderscorner/byte-struct/actions/workflows/maven.yml)
 
-Zero‑allocation typed views over byte arrays for high‑performance message processing. Lazy evaluation of the data,
-no memory allocation at runtime beyond initial creation.
+## Why ByteStruct Exists
 
-Licence: Apache 2.0
+Java gives you powerful low‑level primitives (MemorySegment, VarHandle, Panama), but it still doesn’t give you the one thing real‑time systems actually need:
+
+**A reusable, zero‑allocation struct view over binary data.**
+
+If you’re processing high‑volume binary messages and you can’t afford object churn, GC noise, or schema compilers, ByteStruct fills the gap. It gives you a stable, long‑lived view over any binary buffer — on‑heap or off‑heap — without allocating, generating code, or depending on external tools
+
+## Design Rationale
+
+ByteStruct is intentionally small and explicit. It focuses on three things:
+
+* Zero allocation on the hot path — struct views are reused, not recreated.
+* Clear, explicit layouts — offsets and types are visible in code, not hidden behind codegen.
+* No schema language or build‑time tooling — works with dynamic or ad‑hoc binary formats.
+It’s the missing layer between raw memory access and full serialization frameworks.
+
+## When to Use ByteStruct
+
+Use ByteStruct when:
+
+* You need zero‑allocation access to binary fields.
+* You want predictable GC behaviour in a real‑time pipeline.
+* You’re working with dynamic or evolving layouts where schema compilers are a burden.
+* You want a simple, explicit struct view without code generation or external tools.
+* You’re decoding messages that will be stored or reused without copying.
+
+This is ideal for market‑data feeds, telemetry, IPC, off‑heap storage, and any throughput‑sensitive system.
+
+## Addressing the Two Common Questions
+
+### “Why not just use MemorySegment directly?”
+
+Because MemorySegment is a primitive. It doesn’t give you a reusable struct view, a place to store decoded fields, or an ergonomic API. ByteStruct does.
+
+### “Isn’t SBE faster?”
+
+Yes — but irrelevant. SBE is schema‑driven and code‑generated. It doesn’t solve the long‑term storage or reuse problem, and it’s not suitable for arbitrary binary layouts.
+
+## How it is used
 
 This library provides a `BaseMessage` class that can process data in C++ struct format, with minimal runtime allocation 
 in the main loop. To access the data in the message we simply create views that look into a byte array. These views allow
@@ -17,26 +53,13 @@ imagine that it will be mainly used with versions 22 and later.
 The UTF-8 parser is compliant and allocates no memory at runtime beyond initial creation, it was built originally
 to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
 a huge number of library users, and it light enough to run on an 8-bit AVR microcontroller with 32K FLASH and 2K of RAM.
-Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.  
+Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.
+
+`Utf8View` also properly implements `hashCode`, `equals` and `Comparable` meaning you can use as a key in any containers from Utf8View without risking memory allocation. For example:
+
+    ConcurrentMap myMap = new ConcurrentHashMap<Utf8View, PriceMessage>();
 
 There is a [demonstration project repository](https://github.com/davetcc/MockTradingSimulator) that doubles as my test-harness.
-
-## What are we optimizing for?
-
-TL;DR: This library is most effective if the messages are reused in a pool or conflate. It would not be particularly 
-efficient to use this library for a situation where the message objects need to be created frequently.
-
-I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimize,
-we have have to ask what exactly we are trying to optimize for. For example, sometimes its preferential to have a bit higher
-CPU activity but less memory churn, and that's exactly what this library is designed to do.
-
-The general idea behind the project is that there would be a one-off cost of message creation, for a price system as an
-example they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are
-designed for cases where either the objects can be pooled, and repeatedly given out, or situations such as price data
-where the existing data is updated.
-
-Profiling of Java code with the MockTradingSystem shared library loaded shows that this library can process millions of
-messages without significantly affecting JVM memory. 
 
 ## Using C++ structs in your java code
 
@@ -87,9 +110,63 @@ Here as an example, we use a native method handle with an arena and populate our
 
 You can also split up `IntegerView` and `LongView` into partial fields as follows allowing for bit structs like in C:
 
-    anIntView.booleanPartial(bit) - get the boolean (0=false, 1=true) from a bit
-    anIntView.intPartial(startBit, numBits) - get the integer value from a bit range
-    anIntView.enumPartial(startBit, numBits, MyEnum.class) - maps to the provided enum by ordinal
+In C++ your struct looks like:
+
+```
+struct TradingInformation {
+    uint32_t isTradable: 1;      //0
+    uint32_t isPreMarket: 1;     //1
+    uint32_t flaggedAsBlocked: 1;//2
+    uint32_t tradableVenue : 6;  //3-8
+    uint32_t productType : 6;    //9-14
+    uint32_t ticksPerPoint : 16; //15-31
+};
+
+class StaticMessage {
+private:
+    char ticker[32];
+    TradingInformation tradeInfo;
+public:
+    StaticMessage() = default;
+    StaticMessage(const StaticMessage& other) = default;
+    StaticMessage& operator=(const StaticMessage& other) = default;
+    StaticMessage(const char* ticker, TradingInformation tradeInfo)
+        : ticker(), tradeInfo(tradeInfo) {
+        strncpy(this->ticker, ticker, sizeof(this->ticker) - 1);
+        this->ticker[sizeof(this->ticker) - 1] = '\0';
+    }
+
+    [[nodiscard]] const char* getTicker() const { return ticker; }
+    [[nodiscard]] uint32_t getTicksPerPoint() const { return tradeInfo.ticksPerPoint; }
+    [[nodiscard]] ProductType getProductType() const { return static_cast<ProductType>(tradeInfo.productType); }
+    [[nodiscard]] TradableVenue getTradableVenue() const { return static_cast<TradableVenue>(tradeInfo.tradableVenue); }
+    [[nodiscard]] bool isTradable() const { return static_cast<ProductType>(tradeInfo.isTradable); }
+    [[nodiscard]] bool isPreMarket() const { return static_cast<ProductType>(tradeInfo.isPreMarket); }
+    [[nodiscard]] bool isFlaggedAsBlocked() const { return static_cast<ProductType>(tradeInfo.flaggedAsBlocked); }
+};
+```
+
+In Java your class looks like:
+
+```
+public class StaticMessage extends BaseMessage {
+    @Getter
+    private final Utf8View ticker = DataViews.ofUtf8View(0, 32);
+    private final IntegerView tradeInfo = DataViews.ofIntView(32);
+
+    public StaticMessage() {
+        super(36);
+        addByteViewListeners(ticker, tradeInfo);
+    }
+
+    public boolean isTradeable() { return tradeInfo.booleanPartial(0); }
+    public boolean isPreMarket() { return tradeInfo.booleanPartial(1); }
+    public boolean isBlocked() { return tradeInfo.booleanPartial(2); }
+    public TradeableVenue getTradeableVenue() { return tradeInfo.enumPartial(3, 6, TradeableVenue.class); }
+    public ProductType getProductType() { return tradeInfo.enumPartial(9, 6, ProductType.class); }
+    public int getTicksPerPoint() { return tradeInfo.intPartial(15, 16); }
+}
+```
 
 ## Using the UTF-8 Unicode encoder standalone
 
@@ -108,8 +185,26 @@ an int array without using the `Message` class. The encoder can be used as below
 **When to use this?** Either in systems that require reduced allocation or when dealing with C++ structs.
 
 In regular systems where memory allocation is not an issue do not use this class. For example, in tcMenu designer.
-I don't even use these classes myself because it is not low latency, it is high throughput and does not need this
+I don't even use these classes myself because it is not low latency, it is high throughput; and therefore does not need this
 extra complexity.
+
+## What are we optimizing for?
+
+TL;DR: This library is most effective if the messages are reused in a pool or conflate. It would not be particularly
+efficient to use this library for a situation where the message objects need to be created frequently.
+
+I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimize,
+we have have to ask what exactly we are trying to optimize for. For example, sometimes its preferential to have a bit higher
+CPU activity but less memory churn, and that's exactly what this library is designed to do.
+
+The general idea behind the project is that there would be a one-off cost of message creation, for a price system as an
+example they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are
+designed for cases where either the objects can be pooled, and repeatedly given out, or situations such as price data
+where the existing data is updated.
+
+Profiling of Java code with the MockTradingSystem shared library loaded shows that this library can process millions of
+messages without significantly affecting JVM memory.
+
 
 ## ByteStruct is provided by Dave Cherry / TheCodersCorner.com.
 
