@@ -1,0 +1,83 @@
+# Nested repository / external checkout
+byte-struct/
+
+# CMake / C++ build outputs
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Native binaries and object files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+# Debug / profiling artifacts
+*.dSYM/
+*.pdb
+*.ilk
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+
+# Java build outputs
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven wrapper / Gradle cache artifacts
+.mvn/timing.properties
+.gradle/
+
+# IntelliJ / JetBrains IDE files
+.idea/
+*.iml
+*.iws
+
+# Eclipse / Java IDE files
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Visual Studio / C++ IDE files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
