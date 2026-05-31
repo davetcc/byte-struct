@@ -85,6 +85,7 @@ public class BaseMessage {
             throw new IllegalArgumentException("Array size too small, not copying");
         }
         System.arraycopy(d, 0, data.get(), 0, data.get().length);
+        existingArrayChanged();
     }
 
 

@@ -18,5 +18,6 @@
 
     <modules>
         <module>byte-struct-core</module>
+        <module>byte-struct-benchmarks</module>
     </modules>
 </project>

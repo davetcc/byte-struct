@@ -10,17 +10,6 @@ Java gives you powerful low‑level primitives (MemorySegment, VarHandle, Panama
 
 If you’re processing high‑volume binary messages and you can’t afford object churn, GC noise, or schema compilers, ByteStruct fills the gap. It gives you a stable, long‑lived view over any binary buffer — on‑heap or off‑heap — without allocating, generating code, or depending on external tools
 
-## Design Rationale
-
-ByteStruct is intentionally small and explicit. It focuses on three things:
-
-* Zero allocation on the hot path — struct views are reused, not recreated.
-* Clear, explicit layouts — offsets and types are visible in code, not hidden behind codegen.
-* No schema language or build‑time tooling — works with dynamic or ad‑hoc binary formats.
-It’s the missing layer between raw memory access and full serialization frameworks.
-
-## When to Use ByteStruct
-
 Use ByteStruct when:
 
 * You need zero‑allocation access to binary fields.
@@ -31,19 +20,60 @@ Use ByteStruct when:
 
 In summary, byte-struct is not the fastest library out there, and was never deigned to be. Rather, consider it as a series of components that make reading C-struct style byte arrays easier. It is ideal for market‑data feeds, telemetry, IoT sensor acquisition, IPC, off‑heap storage, and any throughput‑sensitive system.
 
-## Examples, benchmarks and test harness
+## Performance Characteristics
+
+ByteStruct is designed as a zero‑allocation, structured view over binary data.
+
+It is not just a decoder: it provides POJO‑like field semantics, lazy evaluation, and stable storage for decoded values.
+
+This means the performance numbers below include both **decode and storage costs, not just raw parsing.**
+
+### Stated aims of the library are:
+
+* Zero‑allocation access to binary messages
+* Stable, reusable struct views that behave like POJOs
+* Lazy evaluation of all fields, deferred until they are used (e.g., UTF‑8)
+* Automatic invalidation when the underlying buffer changes
+* Comparable and hashable UTF‑8 views (Utf8View)
+* Predictable performance suitable for real‑time systems
+                           
+This makes ByteStruct suitable for market‑data pipelines, telemetry, IPC, and any workload where messages are read frequently and allocations must be avoided.
+
+### UTF‑8 Storage Model
+
+UTF‑8 fields are decoded into an internal pre-allocated int[] codepoint array lazily when first used. This is more work than a simple ASCII fast‑path decoder, providing correctness, safety, and reusability.:
+
+* Stable, POJO‑like semantics
+* Fast comparable, equality, and hashing
+* No intermediate String or char[] allocations
+* Full support for the entire Unicode range
+* Correct handling of multi‑byte sequences using a state-machine
+
+### Benchmark Results
+
+Benchmarks were run using JMH on a modern laptop JVM. You can see the code behind them in the `byte-struct-benchmarks` project.
+
+Each test includes:
+
+* The numeric tests used two numeric fields, a long and an int.
+* The UTF-8 tests used two UTF-8 fields, a 16 byte and a 32 byte.
+* Both a lazy (read one of the fields) and non-lazy (read both fields)
+
+```
+Benchmark                                        Mode  Cnt    Score   Error  Units
+StructBenchmark.testNumericFromRawCopyLazy       avgt    5   12.091 ± 0.100  ns/op
+StructBenchmark.testNumericFromRawCopyNonLazy    avgt    5   21.141 ± 0.307  ns/op
+StructBenchmark.testNumericFromRawPtrChgLazy     avgt    5   15.959 ± 0.325  ns/op
+StructBenchmark.testNumericFromRawPtrChgNonLazy  avgt    5   23.172 ± 0.202  ns/op
+StructBenchmark.testUtf8CopyLazyFromRaw          avgt    5   49.344 ± 0.478  ns/op
+StructBenchmark.testUtf8CopyNotLazyFromRaw       avgt    5  115.199 ± 3.001  ns/op
+StructBenchmark.testUtf8PtrChgLazyFromRaw        avgt    5   51.315 ± 0.236  ns/op
+StructBenchmark.testUtf8PtrChgNotLazyFromRaw     avgt    5  118.652 ± 5.311  ns/op
+```
+
+## Examples, benchmarks, and test harness
 
 The [trading sim and other examples](examples/README.md) are packaged within this repository. The example used in the YouTube introduction/demonstration and benchmarks are directly buildable and available there.
-
-## Addressing the Two Common Questions
-
-### “Why not just use MemorySegment directly?”
-
-Because MemorySegment is a primitive. It doesn’t give you a reusable struct view, a place to store decoded fields, or an ergonomic API. ByteStruct does.
-
-### “Isn’t SBE faster?”
-
-Yes — but irrelevant. SBE is schema‑driven and code‑generated. It doesn’t solve the long‑term storage or reuse problem, and it’s not suitable for arbitrary binary layouts.
 
 ## How it is used
 
@@ -191,24 +221,6 @@ an int array without using the `Message` class. The encoder can be used as below
 In regular systems where memory allocation is not an issue do not use this class. For example, in tcMenu designer.
 I don't even use these classes myself because it is not low latency, it is high throughput; and therefore does not need this
 extra complexity.
-
-## What are we optimizing for?
-
-TL;DR: This library is most effective if the messages are reused in a pool or conflate. It would not be particularly
-efficient to use this library for a situation where the message objects need to be created frequently.
-
-I've spent a good few years with one foot in the finance market, and another in the embedded domain. Whenever we optimize,
-we have have to ask what exactly we are trying to optimize for. For example, sometimes its preferential to have a bit higher
-CPU activity but less memory churn, and that's exactly what this library is designed to do.
-
-The general idea behind the project is that there would be a one-off cost of message creation, for a price system as an
-example they'd go into a map by ticker or other key, and then they'd be updated against the key. These classes are
-designed for cases where either the objects can be pooled, and repeatedly given out, or situations such as price data
-where the existing data is updated.
-
-Profiling of Java code with the MockTradingSystem shared library loaded shows that this library can process millions of
-messages without significantly affecting JVM memory.
-
 
 ## ByteStruct is provided by Dave Cherry / TheCodersCorner.com.
 
