@@ -77,28 +77,19 @@ The [trading sim and other examples](examples/README.md) are packaged within thi
 
 ## How it is used
 
-This library provides a `BaseMessage` class that can process data in C++ struct format, with minimal runtime allocation 
-in the main loop. To access the data in the message we simply create views that look into a byte array. These views allow
-for efficient and type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies.
+This library provides a `BaseMessage` class that can process data in C++ struct format, with minimal runtime allocation in the main loop. To access the data in the message we simply create views that look into a byte array. These views allow for efficient and type-safe access to C++ struct data in Java, with minimal overhead and no runtime dependencies.
 
-It should work with Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd 
-imagine that it will be mainly used with versions 22 and later.
+It should work with Java 21 upward, but as it's generally designed to work with Project Panama foreign memory API, I'd imagine that it will be mainly used with versions 22 and later.
 
-The UTF-8 parser is compliant and allocates no memory at runtime beyond initial creation, it was built originally
-to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by
-a huge number of library users, and it light enough to run on an 8-bit AVR microcontroller with 32K FLASH and 2K of RAM.
-Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.
+The UTF-8 parser is compliant and allocates no memory at runtime beyond initial creation, it was built originally to support tcMenu, but has been extracted into a standalone library for general use. It has been battle tested there by a huge number of library users, and it is light enough to run on an 8-bit AVR microcontroller with 32K FLASH and 2K of RAM. Further it will only lazy evaluate the UTF-8 encoding when the first request for the data is made.
 
 `Utf8View` also properly implements `hashCode`, `equals` and `Comparable` meaning you can use as a key in any containers from Utf8View without risking memory allocation. For example:
 
     ConcurrentMap myMap = new ConcurrentHashMap<Utf8View, PriceMessage>();
 
-There is a [demonstration project repository](https://github.com/davetcc/MockTradingSimulator) that doubles as my test-harness.
-
 ## Using C++ structs in your java code
 
-In the simplest case, you'd create a class extending `BaseMessage` that has some views in it, and a structure size.
-Once you've allocated the class, you can avoid memory allocation all together in the main processing loop.
+In the simplest case, you'd create a class extending `BaseMessage` that has some views in it, and a structure size. Once you've allocated the class, you can avoid memory allocation all together in the main processing loop.
 
 In C++ land we have:
 
