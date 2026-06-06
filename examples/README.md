@@ -4,15 +4,20 @@ In this package are examples and test harnesses that demonstrate the library and
 
 ```
 examples/
+    hello-byte-struct
     trading-sim
         MockTradingSimulator
         JavaTradingSim
         tradingsim-ui
 ```
 
+## Hello Byte Struct
+
+This is the simplest example that demonstrates how to use byte-struct. It shows how to create a byte-struct message, copy data into it, and use POJO like getters.
+
 ## Trading Sim example
 
-This example is a very simple price conflation service. It is probably the most complete of all examples, this has a C++ producer, a Java consumer->producer and a React UI.
+This example is a very simple price conflation service. It is probably the most complete of all examples, this has a C++ producer, a Java consumer->producer, and a React UI.
 
 It uses Panama Foreign function/memory API so requires at least Java 22 (25 is recommended).
 

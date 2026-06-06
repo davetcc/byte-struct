@@ -56,7 +56,7 @@ function App() {
             </Routes>
             <footer>
                 Written by TheCodersCorner.com / Dave Cherry. See <a
-                href="https://github.com/davetcc/MockTradingSimulator">the github repository</a>
+                href="https://github.com/davetcc/byte-struct">the github repository</a>
             </footer>
         </Router>
     )

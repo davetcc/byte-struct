@@ -5,6 +5,7 @@ interface StatisticsData {
     numberOfConflations: number;
     currentJavaHeapTotal: number;
     totalJvmRuntimeSoFar: number;
+    distributionBlocking: number;
 }
 
 export default function ShowStatisticsPage() {
@@ -12,7 +13,8 @@ export default function ShowStatisticsPage() {
         messagesReceivedFromCpp: 0,
         numberOfConflations: 0,
         currentJavaHeapTotal: 0,
-        totalJvmRuntimeSoFar: 0
+        totalJvmRuntimeSoFar: 0,
+        distributionBlocking: 0,
     });
 
     useEffect(() => {
@@ -42,7 +44,7 @@ export default function ShowStatisticsPage() {
         const k = 1024;
         const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
     const formatUptime = (ms: number) => {
@@ -75,6 +77,10 @@ export default function ShowStatisticsPage() {
                     <div className="stat-pair">
                         <span className="stat-label">Collations performed:</span>
                         <span className="stat-value">{stats.numberOfConflations.toLocaleString()}</span>
+                    </div>
+                    <div className="stat-pair">
+                        <span className="stat-label">Distribution blocks:</span>
+                        <span className="stat-value">{stats.distributionBlocking.toLocaleString()}</span>
                     </div>
                     <div className="stat-pair">
                         <span className="stat-label">Collation ratio:</span>

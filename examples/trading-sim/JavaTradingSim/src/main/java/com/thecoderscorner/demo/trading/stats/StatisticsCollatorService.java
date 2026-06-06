@@ -14,6 +14,7 @@ public class StatisticsCollatorService implements StatisticsCollection {
     private final AtomicLong numberOfConflations = new AtomicLong(0);
     private final AtomicLong currentJavaHeapTotal = new AtomicLong(0);
     private final AtomicLong totalJvmRuntimeSoFar = new AtomicLong(0);
+    private final AtomicLong numberOfBlockedLocks = new AtomicLong(0);
     private final long whenStarted = System.currentTimeMillis();
     private final Sinks.Many<StatisticsPojo> statisticsSink = Sinks.many().multicast().directBestEffort();
 
@@ -28,7 +29,8 @@ public class StatisticsCollatorService implements StatisticsCollection {
                 messagesReceivedFromCpp.get(),
                 numberOfConflations.get(),
                 currentJavaHeapTotal.get(),
-                totalJvmRuntimeSoFar.get()
+                totalJvmRuntimeSoFar.get(),
+                numberOfBlockedLocks.get()
         ), Sinks.EmitFailureHandler.FAIL_FAST);
     }
 
@@ -42,12 +44,18 @@ public class StatisticsCollatorService implements StatisticsCollection {
         numberOfConflations.incrementAndGet();
     }
 
+    @Override
+    public void blockedLockOnDistribute() {
+        numberOfBlockedLocks.incrementAndGet();
+    }
+
     public StatisticsPojo getLatest() {
         return new StatisticsPojo(
                 messagesReceivedFromCpp.get(),
                 numberOfConflations.get(),
                 currentJavaHeapTotal.get(),
-                totalJvmRuntimeSoFar.get()
+                totalJvmRuntimeSoFar.get(),
+                numberOfBlockedLocks.get()
         );
     }
 
@@ -62,5 +70,6 @@ public class StatisticsCollatorService implements StatisticsCollection {
         long numberOfConflations;
         long currentJavaHeapTotal;
         long totalJvmRuntimeSoFar;
+        long distributionBlocking;
     }
 }
