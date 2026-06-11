@@ -20,6 +20,15 @@ Use ByteStruct when:
 
 In summary, byte-struct is not the fastest library out there, and was never deigned to be. Rather, consider it as a series of components that make reading C-struct style byte arrays easier. It is ideal for market‑data feeds, telemetry, IoT sensor acquisition, IPC, off‑heap storage, and any throughput‑sensitive system.
 
+## How to use
+
+Import directly from maven central:
+
+        <dependency>
+            <groupId>com.thecoderscorner.ll</groupId>
+            <artifactId>byte-struct-core</artifactId>
+        </dependency>
+
 ## Trading Sim and a brief discussion on YouTube
 
 There's a [short YouTube video with a demonstration of the Trading Sim example](https://youtu.be/tV6hWXR6CX0) running live, and run down of the main features.

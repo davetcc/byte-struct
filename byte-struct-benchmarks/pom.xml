@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.thecoderscorner.ll</groupId>
         <artifactId>byte-struct-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
 
     <artifactId>byte-struct-benchmarks</artifactId>

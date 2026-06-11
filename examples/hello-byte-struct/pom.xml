@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.thecoderscorner.demo.trading</groupId>
     <artifactId>hello-byte-struct</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>hello-byte-struct</name>
     <description>A simple example of using byte-struct</description>
     <packaging>jar</packaging>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.thecoderscorner.ll</groupId>
             <artifactId>byte-struct-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>
