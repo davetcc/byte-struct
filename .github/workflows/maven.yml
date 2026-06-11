@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -20,4 +22,4 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn --batch-mode clean verify
+        run: mvn --batch-mode -Dgpg.skip=true clean verify
